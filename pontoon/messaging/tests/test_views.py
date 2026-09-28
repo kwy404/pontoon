@@ -87,3 +87,23 @@ def test_get_recipients_excludes_system_users_with_permissions(
     recipients = get_recipients(form)
     assert user_a in recipients
     assert tm_user not in recipients
+
+
+@pytest.mark.django_db
+def test_send_message_escapes_subject_in_notification(client_superuser, admin):
+    """The subject is plain text, so it must be escaped in the notification."""
+    response = client_superuser.post(
+        "/messaging/ajax/send/",
+        {
+            "subject": "<img src=x onerror=alert(1)>",
+            "body": "Body",
+            "notification": True,
+            "managers": True,
+            "send_to_myself": True,
+        },
+        HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+    )
+    assert response.status_code == 200
+    assert admin.notifications.get().description == (
+        '<h2 class="subject">&lt;img src=x onerror=alert(1)&gt;</h2>Body'
+    )

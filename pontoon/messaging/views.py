@@ -12,6 +12,7 @@ from django.db.models import Count, F, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
+from django.utils.html import escape
 from django.views.decorators.http import require_POST
 
 from pontoon.base.models import Locale, Project, Translation, UserProfile
@@ -329,7 +330,7 @@ def send_message(request):
                 recipient=recipient,
                 verb="has sent you a message",
                 target=None,
-                description=f'<h2 class="subject">{subject}</h2>{body}',
+                description=f'<h2 class="subject">{escape(subject)}</h2>{body}',
                 identifier=identifier,
                 category="direct_message",
             )
